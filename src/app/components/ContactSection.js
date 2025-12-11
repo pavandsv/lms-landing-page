@@ -20,7 +20,7 @@ const [status, setStatus] = useState("idle");
     console.log("Formdata = ", formData);
 
     try {
-      const response = await axios.post("https://lms-60040289923.development.catalystserverless.in/server/lms_function/lms-leads/add",formData)
+      const response = await axios.post("https://lms-60040289923.development.catalystserverless.in/server/lead_generation/lms-leads/add",formData)
       console.log("Response = ", response.data);
       setStatus("success");
     } catch (error) {
