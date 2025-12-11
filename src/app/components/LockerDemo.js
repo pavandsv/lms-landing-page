@@ -286,7 +286,7 @@ export default function LockerDemo({ selectedCabinetId }) {
   const isHoveringLocker = !!hoveredLocker;
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-[420px] relative">
       <Canvas
         shadows
         camera={{ position: [8, 3, 12], fov: 40 }}

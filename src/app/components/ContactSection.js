@@ -3,14 +3,38 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck } from "lucide-react";
+import axios from "axios";
 
 const ContactSection = () => {
-  const [status, setStatus] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    contact_number:""
+  });
 
-  const handleSubmit = (e) => {
+const [status, setStatus] = useState("idle");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("submitting");
-    setTimeout(() => setStatus("success"), 1500);
+    console.log("Formdata = ", formData);
+
+    try {
+      const response = await axios.post("https://lms-60040289923.development.catalystserverless.in/server/lms_function/lms-leads/add",formData)
+      console.log("Response = ", response.data);
+      setStatus("success");
+    } catch (error) {
+      console.log("Error = ", error);
+      setStatus("error");
+    }
+  };
+
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   return (
@@ -25,8 +49,8 @@ const ContactSection = () => {
               Talk to our team
             </h2>
             <p className="text-slate-300 text-center mb-10 text-sm">
-              Share a few details and we’ll schedule a walkthrough tailored to your
-              locker layout and processes.
+              Share a few details and we’ll schedule a walkthrough tailored to
+              your locker layout and processes.
             </p>
 
             {status === "success" ? (
@@ -42,10 +66,13 @@ const ContactSection = () => {
                   Message sent
                 </h3>
                 <p className="text-slate-200 text-sm">
-                  We’ll get back to you within one business day.
+                  Thank you for reaching out. Our team will contact you soon.
                 </p>
                 <button
-                  onClick={() => setStatus(null)}
+                  onClick={() => {
+                    setStatus("idle");
+                    setFormData({ name: "", email: "", phone: "" });
+                  }}
                   className="mt-6 text-xs text-slate-100 underline underline-offset-4"
                 >
                   Send another message
@@ -53,36 +80,31 @@ const ContactSection = () => {
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-slate-200">
-                      First name
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-100/60 transition-all"
-                      placeholder="Ananya"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-slate-200">
-                      Last name
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-100/60 transition-all"
-                      placeholder="Rao"
-                    />
-                  </div>
+                {/* Name */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-200">
+                    Name
+                  </label>
+                  <input
+                    onChange={handleOnChange}
+                    value={formData.name}
+                    name="name"
+                    required
+                    type="text"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-100/60 transition-all"
+                    placeholder="Enter Your Name"
+                  />
                 </div>
 
+                {/* Work email */}
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-slate-200">
                     Work email
                   </label>
                   <input
+                    onChange={handleOnChange}
+                    name="email"
+                    value={formData.email}
                     required
                     type="email"
                     className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-100/60 transition-all"
@@ -90,24 +112,42 @@ const ContactSection = () => {
                   />
                 </div>
 
+                {/* Contact number */}
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-slate-200">
-                    How are you managing lockers today?
+                    Contact number
                   </label>
-                  <textarea
+                  <input
+                    onChange={handleOnChange}
+                    value={formData.contact_number}
+                    name="contact_number"
                     required
-                    rows={4}
+                    type="tel"
                     className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-100/60 transition-all"
-                    placeholder="Briefly describe your current process..."
+                    placeholder="+91 98765 43210"
                   />
                 </div>
+
+                {/* Error message (optional) */}
+                {status === "error" && (
+                  <p className="text-xs text-red-400">
+                    Something went wrong. Please try again.
+                  </p>
+                )}
 
                 <button
                   type="submit"
                   disabled={status === "submitting"}
-                  className="w-full bg-white hover:bg-slate-100 text-slate-950 font-semibold py-3.5 rounded-full text-sm transition-all shadow-lg shadow-black/40 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center bg-white hover:bg-slate-100 text-slate-950 font-semibold py-3.5 rounded-full text-sm transition-all shadow-lg shadow-black/40 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {status === "submitting" ? "Sending..." : "Request a walkthrough"}
+                  {status === "submitting" ? (
+                    <>
+                      <span className="h-4 w-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Submit"
+                  )}
                 </button>
               </form>
             )}
