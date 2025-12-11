@@ -11,12 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        {children}
-
-        <script src="https://static.zohocdn.com/catalyst/sdk/js/4.0.0/catalystWebSDK.js"></script>
-        <script src="/__catalyst/sdk/init.js"></script>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
