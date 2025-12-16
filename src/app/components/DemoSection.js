@@ -47,13 +47,13 @@ const DemoSection = () => {
                   <li className="flex items-start gap-3 text-slate-700">
                     <MousePointerClick className="w-5 h-5 text-slate-900 mt-0.5" />
                     <span className="text-sm">
-                      <strong>Click</strong> on a locker to see its status or edit it.
+                      <strong>Hover</strong> on a locker to view its details.
                     </span>
                   </li>
                   <li className="flex items-start gap-3 text-slate-700">
                     <Lock className="w-5 h-5 text-slate-900 mt-0.5" />
                     <span className="text-sm">
-                      <strong>Customize</strong> rows and sizes using the panel.
+                      <strong>Live status</strong> reflects availability in real-time.
                     </span>
                   </li>
                   <li className="flex items-start gap-3 text-slate-700">
@@ -106,6 +106,7 @@ const DemoSection = () => {
                         Available
                       </span>
                     </div>
+
                     <div className="flex items-center gap-2">
                       <span
                         className="w-3 h-3 rounded-full"
@@ -115,6 +116,7 @@ const DemoSection = () => {
                         Rented
                       </span>
                     </div>
+
                     <div className="flex items-center gap-2">
                       <span
                         className="w-3 h-3 rounded-full"
@@ -124,6 +126,7 @@ const DemoSection = () => {
                         Reserved
                       </span>
                     </div>
+
                     <div className="flex items-center gap-2">
                       <span
                         className="w-3 h-3 rounded-full"
@@ -139,7 +142,7 @@ const DemoSection = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: 3D card ONLY */}
+          {/* RIGHT COLUMN */}
           <div className="lg:col-span-3 h-[600px] lg:h-[700px] w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 ring-4 ring-slate-100">
             <LockerDemo selectedCabinetId={selectedCabinetId} />
           </div>

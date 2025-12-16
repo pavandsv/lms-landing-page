@@ -13,31 +13,18 @@ import {
 import cabinetsConfig from "./lockersConfig.json";
 
 const STATUS_TINTS = {
-  reserved: {
-    base: "#3b82f6", // blue
-    glow: "lightblue", // soft blue glow
-  },
-  rented: {
-    base: "#f97316", // orange
-    glow: "darkorange", // soft orange glow
-  },
-  maintenance: {
-    base: "#9ca3af", // grey
-    glow: "red", // soft grey glow
-  },
-  available: {
-    base: "#22c55e", // green
-    glow: "lightgreen", // soft green glow
-  },
+  available: { base: "#e5e7eb", glow: "#ffffff", accent: "#22c55e" },
+  rented: { base: "#cbd5e1", glow: "#e5e7eb", accent: "#f97316" },
+  reserved: { base: "#cbd5e1", glow: "#e5e7eb", accent: "#3b82f6" },
+  maintenance: { base: "#a1a1aa", glow: "#d4d4d8", accent: "#ef4444" },
 };
 
 const COLORS = {
-  text: "#020617", // almost black
-  body: "#e5e7eb", // light locker metal
-  frame: "#9ca3af", // subtle frame
-  handle: "#d4d4d8", // lighter metal handle
+  body: "#64748b",
+  frame: "#cbd5e1",
 };
 
+// --- 3D COMPONENT: INDIVIDUAL LOCKER ---
 const Locker3D = ({
   position,
   width,
@@ -48,6 +35,7 @@ const Locker3D = ({
   id,
   rowId,
   onHoverChange,
+  cabinetDims,
 }) => {
   const [hovered, setHovered] = useState(false);
 
@@ -57,6 +45,17 @@ const Locker3D = ({
   const doorHeight = height - 0.16;
   const doorDepth = depth * 0.45;
   const bodyDepth = depth * 0.7;
+  const FRONT_Z = bodyDepth / 2 + 0.012;
+
+  // Label chip
+  const CHIP_H = 0.22;
+  const CHIP_PAD_X = 0.1;
+  const CHIP_Z = 0.008;
+  const CHIP_MARGIN_TOP = 0.14;
+
+  const LABEL_FONT = Math.min(0.16, Math.max(0.11, doorWidth * 0.075));
+  const CHIP_W = Math.min(doorWidth * 0.82, 1.9);
+  const LABEL_MAX_W = CHIP_W - CHIP_PAD_X * 2;
 
   const handlePointerOver = (e) => {
     e.stopPropagation();
@@ -69,7 +68,9 @@ const Locker3D = ({
       status,
       width,
       height,
+      depth,
       rowId,
+      cabinetDims,
     });
   };
 
@@ -82,13 +83,16 @@ const Locker3D = ({
 
   return (
     <group position={position} scale={hovered ? 1.02 : 1}>
-      {/* Locker body / shell */}
+      {/* Locker body */}
       <mesh>
         <boxGeometry args={[width, height, bodyDepth]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={COLORS.body}
-          roughness={0.85}
-          metalness={0.15}
+          roughness={0.22}
+          metalness={0.18}
+          clearcoat={1}
+          clearcoatRoughness={0.06}
+          reflectivity={0.9}
         />
         <Edges color={COLORS.frame} threshold={15} />
       </mesh>
@@ -101,107 +105,69 @@ const Locker3D = ({
       >
         <boxGeometry args={[doorWidth, doorHeight, doorDepth]} />
         <meshPhysicalMaterial
-          color={doorTint.base} // status color
+          color="#ffffff"
           transparent
-          opacity={0.7} // a bit softer
-          roughness={0.2}
-          metalness={0.5}
-          transmission={0.55} // glass effect
-          thickness={0.3}
-          reflectivity={0.9}
-          clearcoat={0.9}
-          clearcoatRoughness={0.08}
-          // softer glow, boosted a little on hover
+          opacity={0.14}
+          roughness={0.08}
+          metalness={0.0}
+          transmission={0.95}
+          thickness={0.25}
+          reflectivity={0.95}
+          clearcoat={1}
+          clearcoatRoughness={0.06}
           emissive={doorTint.glow}
-          emissiveIntensity={hovered ? 0.35 : 0.15}
+          emissiveIntensity={hovered ? 0.18 : 0.06}
         />
-
         <Edges color="#e5e7eb" threshold={20} />
       </mesh>
 
-      {/* Handle on right side of door (vertical line) */}
-      <mesh position={[doorWidth / 2 - 0.12, 0, bodyDepth / 2 + 0.02]}>
-        <boxGeometry args={[0.05, 0.45, 0.07]} />
+      {/* Handle */}
+      <mesh position={[-doorWidth * 0.28, 0, 0.021]}>
+        <circleGeometry args={[0.05, 24]} />
         <meshStandardMaterial
-          color={COLORS.handle}
-          metalness={0.85}
-          roughness={0.25}
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={0.25}
+          roughness={0.2}
+          metalness={0.0}
         />
       </mesh>
 
-      {/* Small key area under handle (dot) */}
+      {/* Status badge */}
       <mesh
-        position={[doorWidth / 2 - 0.12, -doorHeight / 4, bodyDepth / 2 + 0.03]}
-      >
-        <boxGeometry args={[0.07, 0.07, 0.04]} />
-        <meshStandardMaterial
-          color={COLORS.handle}
-          metalness={0.9}
-          roughness={0.3}
-        />
-      </mesh>
-
-      <group
         position={[
-          0,
-          doorHeight / 2 - 0.15, // inside top area of the door
-          bodyDepth / 2 + 0.035, // flush with door surface
+          -doorWidth / 2 + 0.14,
+          -doorHeight / 2 + 0.14,
+          bodyDepth / 2 + 0.04,
         ]}
       >
-        {/* Chip background with border radius */}
-        <RoundedBox
-          args={[doorWidth * 0.7, 0.18, 0.02]} // width, height, depth
-          radius={0.08}
-          smoothness={4}
-        >
-          <meshStandardMaterial
-            color="#ffffff"
-            roughness={0.3}
-            metalness={0.05}
-          />
+        <boxGeometry args={[0.18, 0.18, 0.02]} />
+        <meshStandardMaterial
+          color={doorTint.accent}
+          emissive={doorTint.accent}
+          emissiveIntensity={0.5}
+          roughness={0.3}
+          metalness={0.15}
+        />
+      </mesh>
+
+      {/* Label chip */}
+      <group
+        position={[0, doorHeight / 2 - CHIP_MARGIN_TOP - CHIP_H / 2, FRONT_Z]}
+      >
+        <RoundedBox args={[CHIP_W, CHIP_H, CHIP_Z]} radius={0.06} smoothness={8}>
+          <meshBasicMaterial color="#ffffff" />
         </RoundedBox>
 
-        {/* Label text */}
         <Text
-          position={[0, 0, 0.02]}
-          fontSize={Math.min(doorWidth, height) * 0.16}
+          position={[0, 0, CHIP_Z / 2 + 0.002]}
+          fontSize={LABEL_FONT}
           color="#0f172a"
           anchorX="center"
           anchorY="middle"
-          maxWidth={doorWidth * 0.65}
+          maxWidth={LABEL_MAX_W}
           overflowWrap="break-word"
-        >
-          {label}
-        </Text>
-      </group>
-
-      {/* 🔹 White chip label INSIDE the locker at the top of the door */}
-      <group
-        position={[
-          0,
-          doorHeight / 2 - 0.15, // inside top area of the door
-          bodyDepth / 2 + 0.035, // flush with door surface
-        ]}
-      >
-        {/* Chip background */}
-        <mesh>
-          <boxGeometry args={[doorWidth * 0.7, 0.18, 0.02]} />
-          <meshStandardMaterial
-            color="#ffffff"
-            roughness={0.3}
-            metalness={0.05}
-          />
-        </mesh>
-
-        {/* Label text */}
-        <Text
-          position={[0, 0, 0.015]}
-          fontSize={Math.min(doorWidth, height) * 0.16}
-          color="#0f172a"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={doorWidth * 0.65}
-          overflowWrap="break-word"
+          lineHeight={0.95}
         >
           {label}
         </Text>
@@ -211,8 +177,9 @@ const Locker3D = ({
 };
 
 // --- 3D COMPONENT: CABINET ASSEMBLY ---
+// ✅ Back panel removed: only lockers render now
 const Cabinet3D = ({ rows, specs, onHoverChange }) => {
-  const { width, height, depth, thickness } = specs;
+  const { width, height, depth } = specs;
 
   const renderedRows = useMemo(() => {
     const components = [];
@@ -224,6 +191,7 @@ const Cabinet3D = ({ rows, specs, onHoverChange }) => {
 
       row.lockers.forEach((locker) => {
         const lockerX = currentX + locker.width / 2;
+
         components.push(
           <Locker3D
             key={locker.id}
@@ -236,8 +204,10 @@ const Cabinet3D = ({ rows, specs, onHoverChange }) => {
             status={locker.status}
             rowId={row.id}
             onHoverChange={onHoverChange}
+            cabinetDims={{ width, height, depth }}
           />
         );
+
         currentX += locker.width;
       });
 
@@ -247,25 +217,7 @@ const Cabinet3D = ({ rows, specs, onHoverChange }) => {
     return components;
   }, [rows, width, height, depth, onHoverChange]);
 
-  return (
-    <group>
-      {/* Back Panel / wall */}
-      <mesh position={[0, 0, -depth / 2 - thickness / 2]}>
-        <boxGeometry
-          args={[width + thickness, height + thickness, thickness]}
-        />
-        <meshStandardMaterial
-          color="#e5e7eb"
-          roughness={0.95}
-          metalness={0.05}
-        />
-      </mesh>
-
-      {/* Outer wireframe removed (no more diagonal line) */}
-
-      {renderedRows}
-    </group>
-  );
+  return <group>{renderedRows}</group>;
 };
 
 // --- MAIN COMPONENT ---
@@ -295,7 +247,7 @@ export default function LockerDemo({ selectedCabinetId }) {
         <color attach="background" args={["#f3f4f6"]} />
 
         {/* Lighting */}
-        <ambientLight intensity={0.75} />
+        <ambientLight intensity={1.0} />
         <spotLight
           position={[10, 12, 10]}
           angle={0.4}
@@ -303,11 +255,7 @@ export default function LockerDemo({ selectedCabinetId }) {
           intensity={1.3}
           castShadow
         />
-        <directionalLight
-          position={[-8, 6, 6]}
-          intensity={0.55}
-          color="#ffffff"
-        />
+        <directionalLight position={[-8, 6, 6]} intensity={0.55} color="#ffffff" />
         <pointLight position={[0, -4, 8]} intensity={0.35} />
 
         {/* Controls */}
@@ -317,21 +265,17 @@ export default function LockerDemo({ selectedCabinetId }) {
           autoRotateSpeed={0.7}
           minPolarAngle={Math.PI / 4}
           maxPolarAngle={Math.PI / 1.6}
-          enableZoom={true}
+          enableZoom
         />
 
         <Center position={[0, -0.5, 0]}>
-          <Cabinet3D
-            rows={rows}
-            specs={specs}
-            onHoverChange={setHoveredLocker}
-          />
+          <Cabinet3D rows={rows} specs={specs} onHoverChange={setHoveredLocker} />
         </Center>
 
         <Grid
           args={[30, 30]}
-          cellColor="#e5e7eb"
-          sectionColor="#d4d4d8"
+          cellColor="#94a3b8"
+          sectionColor="#475569"
           position={[0, -5, 0]}
           fadeDistance={24}
         />
@@ -344,7 +288,7 @@ export default function LockerDemo({ selectedCabinetId }) {
         </span>
       </div>
 
-      {/* Tooltip (top-left) */}
+      {/* Tooltip */}
       {hoveredLocker && (
         <div className="absolute left-4 top-4 bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl px-4 py-3 shadow-lg text-xs text-slate-800">
           <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500 mb-1">
@@ -357,16 +301,17 @@ export default function LockerDemo({ selectedCabinetId }) {
                 {hoveredLocker.label || hoveredLocker.id}
               </span>
             </div>
+
             <div className="flex justify-between gap-4">
               <span className="text-slate-500">Status</span>
-              <span className="font-medium capitalize">
-                {hoveredLocker.status}
-              </span>
+              <span className="font-medium capitalize">{hoveredLocker.status}</span>
             </div>
+
             <div className="flex justify-between gap-4">
               <span className="text-slate-500">Row</span>
               <span className="font-medium">Row {hoveredLocker.rowId}</span>
             </div>
+
             <div className="flex justify-between gap-4">
               <span className="text-slate-500">Size</span>
               <span className="font-medium">
@@ -374,6 +319,17 @@ export default function LockerDemo({ selectedCabinetId }) {
                 {hoveredLocker.height.toFixed(2)}
               </span>
             </div>
+
+            {hoveredLocker?.cabinetDims && (
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500">Cabinet</span>
+                <span className="font-medium">
+                  W {hoveredLocker.cabinetDims.width.toFixed(2)} × H{" "}
+                  {hoveredLocker.cabinetDims.height.toFixed(2)} × D{" "}
+                  {hoveredLocker.cabinetDims.depth.toFixed(2)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       )}
