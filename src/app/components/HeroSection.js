@@ -93,7 +93,7 @@ const HeroSection = () => {
 
           {/* Sub copy */}
           <p className="text-base lg:text-lg text-[#0f172a]/70 mb-8 leading-relaxed max-w-xl">
-            LockerSpace brings your physical vault into a precise digital twin.
+            DSV Locker Management System brings your physical vault into a precise digital twin.
             Browse, allocate, and manage lockers in a minimal interface that
             matches your operation and compliance needs.
           </p>
