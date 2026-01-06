@@ -9,10 +9,10 @@ const ContactSection = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    contact_number:""
+    contact_number: "",
   });
 
-const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState("idle");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +20,10 @@ const [status, setStatus] = useState("idle");
     console.log("Formdata = ", formData);
 
     try {
-      const response = await axios.post("https://lms-60040289923.development.catalystserverless.in/server/lead_generation/lms-leads/add",formData)
+      const response = await axios.post(
+        "https://lms-60040289923.development.catalystserverless.in/server/lead_generation/lms-leads/add",
+        formData
+      );
       console.log("Response = ", response.data);
       setStatus("success");
     } catch (error) {
@@ -38,7 +41,7 @@ const [status, setStatus] = useState("idle");
   };
 
   return (
-    <section id="contact" className="py-24 bg-white relative">
+    <section id="contact" className="pt-8 pb-24 bg-white relative">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="bg-slate-950 rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden relative">
           <div className="absolute top-0 right-0 -mr-24 -mt-24 w-72 h-72 bg-slate-700 rounded-full opacity-30 blur-3xl" />

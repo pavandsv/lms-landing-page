@@ -18,7 +18,7 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <HeroSection />
-        <ClientsSection />
+        {/* <ClientsSection /> */}
         <FeaturesSection />
         <DemoSection />
         <PricingSection />
